@@ -62,7 +62,13 @@ function renderBooks(query = '') {
         availability.className = `badge book-availability ${book.copies > 0 ? 'text-bg-success' : 'text-bg-secondary'}`;
         availability.textContent = book.copies > 0 ? `Disponibles: ${book.copies}` : 'No disponible';
 
-        body.append(title, author, isbn, availability);
+        const detailLink = document.createElement('a');
+        detailLink.className = 'btn btn-outline-primary btn-sm mt-3';
+        detailLink.href = `/libro/${encodeURIComponent(book.id)}`;
+        detailLink.textContent = 'Ver detalles';
+        detailLink.setAttribute('aria-label', `Ver detalles de ${book.title}`);
+
+        body.append(title, author, isbn, availability, detailLink);
         card.append(cover, body);
         booksGrid.append(card);
     });
