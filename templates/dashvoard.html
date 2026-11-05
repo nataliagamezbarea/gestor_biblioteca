@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard de Administración</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 p-8">
+    <div class="max-w-6xl mx-auto">
+        <h1 class="text-3xl font-bold mb-6 text-gray-800">Panel de Control (Dashboard)</h1>
+
+        <!-- Tarjetas de Métricas -->
+        <div class="grid grid-cols-3 gap-6 mb-8">
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-gray-500 text-sm">Total Libros</p>
+                <p id="stat-books" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-gray-500 text-sm">Usuarios Registrados</p>
+                <p id="stat-users" class="text-3xl font-bold">0</p>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow">
+                <p class="text-gray-500 text-sm">Préstamos Activos</p>
+                <p id="stat-loans" class="text-3xl font-bold text-amber-600">0</p>
+            </div>
+        </div>
+
+        <p class="text-sm text-gray-500">Acceso API Dashboard: <code>/dashboard/api/stats</code>, <code>/dashboard/api/books</code>, etc.</p>
+    </div>
+
+    <script>
+        // Cargar estadísticas al iniciar
+        fetch('/dashboard/api/stats')
+            .then(res => res.json())
+            .then(data => {
+                document.getElementById('stat-books').innerText = data.total_books;
+                document.getElementById('stat-users').innerText = data.total_users;
+                document.getElementById('stat-loans').innerText = data.active_loans;
+            });
+    </script>
+</body>
+</html>

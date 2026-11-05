@@ -2,71 +2,111 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Sistema de Biblioteca</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catálogo Público - Biblioteca Escolar</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-100 p-8">
-    <div class="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-        <h1 class="text-2xl font-bold mb-4">Gestión de Biblioteca</h1>
-        
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <!-- Formulario Rápido Agregar Libro -->
-            <form id="book-form" class="border p-4 rounded">
-                <h2 class="font-bold mb-2">Registrar Libro</h2>
-                <input type="text" id="title" placeholder="Título" class="border w-full mb-2 p-1" required>
-                <input type="text" id="author" placeholder="Autor" class="border w-full mb-2 p-1" required>
-                <input type="text" id="isbn" placeholder="ISBN" class="border w-full mb-2 p-1" required>
-                <input type="number" id="copies" placeholder="Ejemplares" class="border w-full mb-2 p-1" value="1">
-                <button type="submit" class="bg-blue-500 text-white px-4 py-1 rounded">Guardar</button>
-            </form>
+<body class="bg-gray-100 min-h-screen">
+    <!-- Navegación Superior -->
+    <nav class="bg-indigo-700 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <h1 class="text-xl font-bold flex items-center gap-2">
+                📚 Biblioteca Escolar
+            </h1>
+            <a href="/dashboard" class="bg-indigo-500 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
+                Acceso Admin / Dashboard →
+            </a>
+        </div>
+    </nav>
 
-            <!-- Formulario Rápido Registrar Usuario -->
-            <form id="user-form" class="border p-4 rounded">
-                <h2 class="font-bold mb-2">Registrar Usuario</h2>
-                <input type="text" id="name" placeholder="Nombre completo" class="border w-full mb-2 p-1" required>
-                <input type="email" id="email" placeholder="Correo" class="border w-full mb-2 p-1" required>
-                <select id="role" class="border w-full mb-2 p-1">
-                    <option value="Alumno">Alumno</option>
-                    <option value="Profesor">Profesor</option>
-                </select>
-                <button type="submit" class="bg-green-500 text-white px-4 py-1 rounded">Guardar</button>
-            </form>
+    <!-- Contenido Principal -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Encabezado y Filtro -->
+        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+            <div>
+                <h2 class="text-3xl font-extrabold text-gray-800">Catálogo de Libros</h2>
+                <p class="text-gray-600">Consulta los ejemplares disponibles en el centro educativo</p>
+            </div>
+            <div class="w-full md:w-80">
+                <input 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Buscar por título, autor o ISBN..." 
+                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    oninput="filterBooks()"
+                >
+            </div>
         </div>
 
-        <p class="text-sm text-gray-500">Usa las rutas <code>/api/books</code>, <code>/api/users</code> y <code>/api/loans</code> para interactuar con la API REST.</p>
-    </div>
+        <!-- Grid de Catálogo -->
+        <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Cargando... -->
+            <p class="col-span-full text-center text-gray-500 py-10">Cargando ejemplares...</p>
+        </div>
+    </main>
 
     <script>
-        document.getElementById('book-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetch('/api/books', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: document.getElementById('title').value,
-                    author: document.getElementById('author').value,
-                    isbn: document.getElementById('isbn').value,
-                    copies: document.getElementById('copies').value
-                })
-            });
-            alert('Libro registrado');
-            e.target.reset();
-        });
+        let allBooks = [];
 
-        document.getElementById('user-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await fetch('/api/users', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    name: document.getElementById('name').value,
-                    email: document.getElementById('email').value,
-                    role: document.getElementById('role').value
-                })
+        // Cargar libros desde la API pública al iniciar
+        async function loadCatalog() {
+            try {
+                const response = await fetch('/catalogo');
+                allBooks = await response.json();
+                renderBooks(allBooks);
+            } catch (error) {
+                console.error('Error cargando el catálogo:', error);
+                document.getElementById('books-grid').innerHTML = 
+                    `<p class="col-span-full text-center text-red-500 py-10">Error al obtener el catálogo de la base de datos.</p>`;
+            }
+        }
+
+        // Renderizar tarjetas de libros
+        function renderBooks(books) {
+            const grid = document.getElementById('books-grid');
+            if (books.length === 0) {
+                grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">No se encontraron libros disponibles.</p>`;
+                return;
+            }
+
+            grid.innerHTML = books.map(book => {
+                const isAvailable = book.copies > 0;
+                return `
+                    <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between border border-gray-100 hover:shadow-lg transition">
+                        <div class="p-5">
+                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} mb-3">
+                                ${isAvailable ? `Disponibles: ${book.copies}` : 'Agotado'}
+                            </span>
+                            <h3 class="font-bold text-lg text-gray-900 leading-snug mb-1">${escapeHtml(book.title)}</h3>
+                            <p class="text-sm text-gray-600 mb-3">por ${escapeHtml(book.author)}</p>
+                        </div>
+                        <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
+                            <span>ISBN: ${escapeHtml(book.isbn)}</span>
+                            <span class="font-medium text-indigo-600">ID: #${book.id}</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Filtrado en vivo por título, autor o ISBN
+        function filterBooks() {
+            const query = document.getElementById('search-input').value.toLowerCase();
+            const filtered = allBooks.filter(b => 
+                b.title.toLowerCase().includes(query) ||
+                b.author.toLowerCase().includes(query) ||
+                b.isbn.toLowerCase().includes(query)
+            );
+            renderBooks(filtered);
+        }
+
+        function escapeHtml(text) {
+            return String(text).replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
             });
-            alert('Usuario registrado');
-            e.target.reset();
-        });
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCatalog);
     </script>
 </body>
 </html>
