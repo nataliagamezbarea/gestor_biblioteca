@@ -20,35 +20,51 @@ function renderBooks(query = '') {
     }
 
     visibleBooks.forEach((book) => {
-        const column = document.createElement('div');
-        column.className = 'col-12 col-sm-6 col-lg-4';
-
         const card = document.createElement('article');
-        card.className = 'card h-100 shadow-sm';
+        card.className = 'book-card';
+
+        const cover = document.createElement('div');
+        cover.className = 'book-cover';
+
+        const initial = document.createElement('span');
+        initial.className = 'book-cover-initial';
+        initial.textContent = book.title.charAt(0).toLocaleUpperCase();
+
+        cover.append(initial);
+
+        if (book.cover_url) {
+            const image = document.createElement('img');
+            image.alt = `Portada de ${book.title}`;
+            image.loading = 'lazy';
+            image.src = book.cover_url;
+            image.addEventListener('error', () => image.remove());
+            cover.append(image);
+        }
 
         const body = document.createElement('div');
-        body.className = 'card-body';
-
-        const availability = document.createElement('span');
-        availability.className = `badge ${book.copies > 0 ? 'text-bg-success' : 'text-bg-secondary'} mb-2`;
-        availability.textContent = book.copies > 0 ? `Disponibles: ${book.copies}` : 'No disponible';
+        body.className = 'book-body';
 
         const title = document.createElement('h2');
-        title.className = 'h5 card-title';
+        title.className = 'book-title';
+        title.title = book.title;
         title.textContent = book.title;
 
         const author = document.createElement('p');
-        author.className = 'card-text';
-        author.textContent = `Autor: ${book.author}`;
+        author.className = 'book-author';
+        author.title = book.author;
+        author.textContent = book.author;
 
         const isbn = document.createElement('small');
-        isbn.className = 'text-secondary';
+        isbn.className = 'book-isbn';
         isbn.textContent = `ISBN: ${book.isbn}`;
 
-        body.append(availability, title, author, isbn);
-        card.append(body);
-        column.append(card);
-        booksGrid.append(column);
+        const availability = document.createElement('span');
+        availability.className = `badge book-availability ${book.copies > 0 ? 'text-bg-success' : 'text-bg-secondary'}`;
+        availability.textContent = book.copies > 0 ? `Disponibles: ${book.copies}` : 'No disponible';
+
+        body.append(title, author, isbn, availability);
+        card.append(cover, body);
+        booksGrid.append(card);
     });
 }
 

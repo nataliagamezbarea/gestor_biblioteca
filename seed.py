@@ -53,7 +53,7 @@ def seed_database():
         all_books = Book.query.all()
         all_users = User.query.all()
 
-        if len(all_books) >= 5 and len(all_users) >= 8:
+        if len(all_books) >= 5 and len(all_users) >= 8 and Loan.query.count() == 0:
             loans_data = [
                 Loan(book_id=all_books[0].id, user_id=all_users[4].id, loan_date=datetime.utcnow() - timedelta(days=10), status='Activo'),
                 Loan(book_id=all_books[1].id, user_id=all_users[5].id, loan_date=datetime.utcnow() - timedelta(days=5), status='Activo'),
