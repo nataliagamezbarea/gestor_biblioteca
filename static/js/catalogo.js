@@ -45,7 +45,13 @@ function renderBooks(query = '') {
         isbn.className = 'text-secondary';
         isbn.textContent = `ISBN: ${book.isbn}`;
 
-        body.append(availability, title, author, isbn);
+        const detailLink = document.createElement('a');
+        detailLink.className = 'btn btn-outline-primary btn-sm mt-3';
+        detailLink.href = `/libro/${encodeURIComponent(book.id)}`;
+        detailLink.textContent = 'Ver detalles';
+        detailLink.setAttribute('aria-label', `Ver detalles de ${book.title}`);
+
+        body.append(availability, title, author, isbn, detailLink);
         card.append(body);
         column.append(card);
         booksGrid.append(column);

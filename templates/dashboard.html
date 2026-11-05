@@ -12,6 +12,7 @@
             <a class="navbar-brand fw-semibold" href="{{ url_for('dashboard.index') }}">Biblioteca</a>
             <div class="d-flex align-items-center gap-3">
                 <span class="text-white">{{ current_user.name }} · {{ current_user.role }}</span>
+                <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard.history') }}">Historial</a>
                 {% if is_admin %}
                 <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard.gestion') }}">Gestión</a>
                 {% endif %}
@@ -73,7 +74,7 @@
                     <tbody>
                         {% for book in books %}
                         <tr>
-                            <td>{{ book.title }}</td>
+                            <td><a href="{{ url_for('main.book_detail', book_id=book.id) }}">{{ book.title }}</a></td>
                             <td>{{ book.author }}</td>
                             <td>{{ book.isbn }}</td>
                             <td class="text-end">{{ book.copies }}</td>

@@ -1,4 +1,4 @@
-from flask import Blueprint, flash, jsonify, redirect, render_template, request, session, url_for
+from flask import Blueprint, abort, flash, jsonify, redirect, render_template, request, session, url_for
 from werkzeug.security import check_password_hash, generate_password_hash
 
 from database import db
@@ -75,6 +75,18 @@ def public_catalog():
         'isbn': book.isbn,
         'copies': book.copies,
     } for book in books])
+
+
+@main_bp.route('/libro/<int:book_id>')
+def book_detail(book_id):
+    book = db.session.get(Book, book_id)
+    if book is None:
+        abort(404)
+    return render_template(
+        'libro.html',
+        book=book,
+        is_authenticated=session.get('user_id') is not None,
+    )
 
 
 @main_bp.route('/catalogo/vista')

@@ -5,71 +5,315 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Gestión · Biblioteca</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/gestion.css') }}" rel="stylesheet">
 </head>
-<body class="bg-light">
-    <nav class="navbar navbar-dark bg-primary">
+<body class="management-page">
+    <nav class="navbar navbar-expand-lg navbar-dark management-nav">
         <div class="container">
-            <a class="navbar-brand fw-semibold" href="{{ url_for('dashboard.index') }}">Biblioteca</a>
-            <a class="btn btn-outline-light btn-sm" href="{{ url_for('dashboard.index') }}">Volver al panel</a>
+            <a class="navbar-brand d-flex align-items-center gap-2 fw-semibold" href="{{ url_for('dashboard.index') }}">
+                <span class="brand-mark">B</span>
+                Biblioteca
+            </a>
+            <div class="d-flex gap-2">
+                <a class="btn btn-nav" href="{{ url_for('dashboard.history') }}">Historial</a>
+                <a class="btn btn-nav" href="{{ url_for('dashboard.index') }}">Volver al panel</a>
+            </div>
         </div>
     </nav>
 
-    <main class="container py-4">
-        <h1 class="h3 mb-4">Gestión de biblioteca</h1>
-        <div id="feedback" class="alert d-none" role="alert"></div>
-        <div class="row g-4">
-            <div class="col-12 col-lg-6">
-                <section class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h2 class="h5 mb-3">Añadir libro</h2>
-                        <form id="book-form">
-                            <div class="mb-3">
-                                <label for="title" class="form-label">Título</label>
-                                <input class="form-control" id="title" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="author" class="form-label">Autor</label>
-                                <input class="form-control" id="author" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="isbn" class="form-label">ISBN</label>
-                                <input class="form-control" id="isbn" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="copies" class="form-label">Ejemplares</label>
-                                <input class="form-control" type="number" id="copies" value="1" min="1" required>
-                            </div>
-                            <button class="btn btn-primary" type="submit">Guardar libro</button>
-                        </form>
-                    </div>
-                </section>
+    <main class="container management-container py-4 py-lg-5">
+        <header class="management-heading mb-4 mb-lg-5">
+            <div>
+                <span class="eyebrow">ADMINISTRACIÓN</span>
+                <h1>Gestión de biblioteca</h1>
+                <p>Administra el catálogo, los usuarios y los préstamos desde un solo lugar.</p>
             </div>
+        </header>
 
-            <div class="col-12 col-lg-6">
-                <section class="card shadow-sm h-100">
-                    <div class="card-body">
-                        <h2 class="h5 mb-3">Crear usuario</h2>
-                        <form id="user-form">
-                            <div class="mb-3">
-                                <label for="name" class="form-label">Nombre</label>
-                                <input class="form-control" id="name" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Correo electrónico</label>
-                                <input class="form-control" type="email" id="email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Contraseña (mínimo 8 caracteres)</label>
-                                <input class="form-control" type="password" id="password" minlength="8" required>
-                            </div>
-                            <button class="btn btn-primary" type="submit">Crear usuario normal</button>
-                        </form>
-                    </div>
-                </section>
+        <div id="feedback" class="alert d-none feedback-banner" role="alert"></div>
+
+        <section class="management-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">CATÁLOGO</span>
+                    <h2>Libros registrados</h2>
+                    <p>Consulta ejemplares y mantén el catálogo actualizado.</p>
+                </div>
+                <button class="btn btn-primary btn-add" type="button" data-bs-toggle="modal" data-bs-target="#add-book-modal">
+                    <span aria-hidden="true">+</span> Añadir libro
+                </button>
             </div>
-        </div>
+            <div class="management-card">
+                <div class="table-responsive">
+                    <table class="table management-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Título</th>
+                                <th scope="col">Autor</th>
+                                <th scope="col">ISBN</th>
+                                <th scope="col">Disponibles</th>
+                                <th scope="col" class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="books-table-body">
+                            <tr><td colspan="5" class="table-loading">Cargando libros…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="management-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">PERSONAS</span>
+                    <h2>Usuarios</h2>
+                    <p>Gestiona las cuentas y sus permisos de acceso.</p>
+                </div>
+                <button class="btn btn-primary btn-add" type="button" data-bs-toggle="modal" data-bs-target="#add-user-modal">
+                    <span aria-hidden="true">+</span> Añadir usuario
+                </button>
+            </div>
+            <div class="management-card">
+                <div class="table-responsive">
+                    <table class="table management-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Nombre</th>
+                                <th scope="col">Correo</th>
+                                <th scope="col">Rol</th>
+                                <th scope="col" class="text-end">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table-body">
+                            <tr><td colspan="4" class="table-loading">Cargando usuarios…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <section class="management-section">
+            <div class="section-heading">
+                <div>
+                    <span class="section-kicker">CIRCULACIÓN</span>
+                    <h2>Historial de préstamos</h2>
+                    <p>Revisa préstamos activos y devoluciones anteriores.</p>
+                </div>
+                <button class="btn btn-primary btn-add" type="button" data-bs-toggle="modal" data-bs-target="#add-loan-modal">
+                    <span aria-hidden="true">+</span> Registrar préstamo
+                </button>
+            </div>
+            <div class="management-card">
+                <div class="table-responsive">
+                    <table class="table management-table align-middle mb-0">
+                        <thead>
+                            <tr>
+                                <th scope="col">Libro</th>
+                                <th scope="col">Usuario</th>
+                                <th scope="col">Préstamo</th>
+                                <th scope="col">Devolución</th>
+                                <th scope="col">Estado</th>
+                                <th scope="col" class="text-end">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="loans-table-body">
+                            <tr><td colspan="6" class="table-loading">Cargando historial…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
     </main>
 
+    <div class="modal fade" id="add-book-modal" tabindex="-1" aria-labelledby="add-book-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content management-modal">
+                <form id="book-form">
+                    <div class="modal-header">
+                        <div>
+                            <span class="section-kicker">CATÁLOGO</span>
+                            <h2 class="modal-title" id="add-book-title">Añadir libro</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="title" class="form-label">Título</label>
+                            <input class="form-control" id="title" placeholder="Ej. El principito" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="author" class="form-label">Autor</label>
+                            <input class="form-control" id="author" placeholder="Nombre del autor" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="isbn" class="form-label">ISBN</label>
+                            <input class="form-control" id="isbn" placeholder="ISBN del libro" required>
+                        </div>
+                        <div>
+                            <label for="copies" class="form-label">Ejemplares</label>
+                            <input class="form-control" type="number" id="copies" value="1" min="1" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">Guardar libro</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add-user-modal" tabindex="-1" aria-labelledby="add-user-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content management-modal">
+                <form id="user-form">
+                    <div class="modal-header">
+                        <div>
+                            <span class="section-kicker">PERSONAS</span>
+                            <h2 class="modal-title" id="add-user-title">Añadir usuario</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Nombre</label>
+                            <input class="form-control" id="name" placeholder="Nombre completo" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Correo electrónico</label>
+                            <input class="form-control" type="email" id="email" placeholder="correo@ejemplo.com" required>
+                        </div>
+                        <div>
+                            <label for="password" class="form-label">Contraseña <span class="text-secondary">(mínimo 8 caracteres)</span></label>
+                            <input class="form-control" type="password" id="password" minlength="8" autocomplete="new-password" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">Crear usuario</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="add-loan-modal" tabindex="-1" aria-labelledby="add-loan-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content management-modal">
+                <form id="loan-form">
+                    <div class="modal-header">
+                        <div>
+                            <span class="section-kicker">CIRCULACIÓN</span>
+                            <h2 class="modal-title" id="add-loan-title">Registrar préstamo</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="loan-user" class="form-label">Usuario</label>
+                            <select class="form-select" id="loan-user" required>
+                                <option value="">Cargando usuarios…</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="loan-book" class="form-label">Libro disponible</label>
+                            <select class="form-select" id="loan-book" required>
+                                <option value="">Cargando libros…</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">Crear préstamo</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="edit-book-modal" tabindex="-1" aria-labelledby="edit-book-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content management-modal">
+                <form id="edit-book-form">
+                    <div class="modal-header">
+                        <div>
+                            <span class="section-kicker">CATÁLOGO</span>
+                            <h2 class="modal-title" id="edit-book-title">Editar libro</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-book-id">
+                        <div class="mb-3">
+                            <label for="edit-title" class="form-label">Título</label>
+                            <input class="form-control" id="edit-title" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-author" class="form-label">Autor</label>
+                            <input class="form-control" id="edit-author" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-isbn" class="form-label">ISBN</label>
+                            <input class="form-control" id="edit-isbn" required>
+                        </div>
+                        <div>
+                            <label for="edit-copies" class="form-label">Ejemplares disponibles</label>
+                            <input class="form-control" type="number" id="edit-copies" min="0" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="edit-user-modal" tabindex="-1" aria-labelledby="edit-user-title" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content management-modal">
+                <form id="edit-user-form">
+                    <div class="modal-header">
+                        <div>
+                            <span class="section-kicker">PERSONAS</span>
+                            <h2 class="modal-title" id="edit-user-title">Editar usuario</h2>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="hidden" id="edit-user-id">
+                        <div class="mb-3">
+                            <label for="edit-user-name" class="form-label">Nombre</label>
+                            <input class="form-control" id="edit-user-name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-user-email" class="form-label">Correo</label>
+                            <input class="form-control" type="email" id="edit-user-email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit-user-role" class="form-label">Rol</label>
+                            <select class="form-select" id="edit-user-role" required>
+                                <option value="Usuario">Usuario</option>
+                                <option value="Administrador">Administrador</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="edit-user-password" class="form-label">Nueva contraseña <span class="text-secondary">(opcional)</span></label>
+                            <input class="form-control" type="password" id="edit-user-password" minlength="8" autocomplete="new-password">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancelar</button>
+                        <button class="btn btn-primary" type="submit">Guardar cambios</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" defer></script>
     <script src="{{ url_for('static', filename='js/gestion.js') }}" defer></script>
 </body>
 </html>

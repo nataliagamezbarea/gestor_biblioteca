@@ -45,10 +45,22 @@ app.add_url_rule(
     methods=['GET', 'POST'],
 )
 app.add_url_rule(
+    '/api/books/<int:book_id>',
+    endpoint='api_book',
+    view_func=app.view_functions['dashboard.manage_book'],
+    methods=['PUT', 'DELETE'],
+)
+app.add_url_rule(
     '/api/users',
     endpoint='api_users',
     view_func=app.view_functions['dashboard.manage_users'],
     methods=['GET', 'POST'],
+)
+app.add_url_rule(
+    '/api/users/<int:user_id>',
+    endpoint='api_user',
+    view_func=app.view_functions['dashboard.manage_user'],
+    methods=['PUT', 'DELETE'],
 )
 app.add_url_rule(
     '/api/loans',
