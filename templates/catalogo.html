@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Catálogo · Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container">
+            <a class="navbar-brand fw-semibold" href="{{ url_for('main.catalog_page') }}">Biblioteca</a>
+            <a class="btn btn-outline-light btn-sm" href="{{ url_for('main.home') }}">Iniciar sesión</a>
+        </div>
+    </nav>
+    <main class="container py-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">Catálogo de libros</h1>
+                <p class="text-secondary mb-0">Consulta los ejemplares disponibles.</p>
+            </div>
+            <input id="search-input" class="form-control" type="search" placeholder="Buscar título, autor o ISBN" aria-label="Buscar libros" style="max-width: 360px;">
+        </div>
+        <div id="books-grid" class="row g-3">
+            <p class="text-center text-secondary">Cargando catálogo…</p>
+        </div>
+    </main>
+    <script src="{{ url_for('static', filename='js/catalogo.js') }}" defer></script>
+</body>
+</html>

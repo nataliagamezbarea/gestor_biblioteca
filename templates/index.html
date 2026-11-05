@@ -2,111 +2,45 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catálogo Público - Biblioteca Escolar</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Iniciar sesión · Biblioteca</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <!-- Navegación Superior -->
-    <nav class="bg-indigo-700 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-            <h1 class="text-xl font-bold flex items-center gap-2">
-                📚 Biblioteca Escolar
-            </h1>
-            <a href="/dashboard" class="bg-indigo-500 hover:bg-indigo-600 px-4 py-2 rounded-lg text-sm font-semibold transition">
-                Acceso Admin / Dashboard →
-            </a>
-        </div>
-    </nav>
+<body class="bg-light">
+    <main class="container min-vh-100 d-flex align-items-center justify-content-center py-4">
+        <section class="card shadow-sm w-100" style="max-width: 420px;">
+            <div class="card-body p-4">
+                <h1 class="h3 text-center mb-1">Biblioteca</h1>
+                <p class="text-secondary text-center mb-4">Inicia sesión para continuar</p>
 
-    <!-- Contenido Principal -->
-    <main class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Encabezado y Filtro -->
-        <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
-            <div>
-                <h2 class="text-3xl font-extrabold text-gray-800">Catálogo de Libros</h2>
-                <p class="text-gray-600">Consulta los ejemplares disponibles en el centro educativo</p>
-            </div>
-            <div class="w-full md:w-80">
-                <input 
-                    type="text" 
-                    id="search-input" 
-                    placeholder="Buscar por título, autor o ISBN..." 
-                    class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                    oninput="filterBooks()"
-                >
-            </div>
-        </div>
+                {% for category, message in get_flashed_messages(with_categories=true) %}
+                <div class="alert alert-{{ category }}" role="alert">{{ message }}</div>
+                {% endfor %}
 
-        <!-- Grid de Catálogo -->
-        <div id="books-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- Cargando... -->
-            <p class="col-span-full text-center text-gray-500 py-10">Cargando ejemplares...</p>
-        </div>
-    </main>
-
-    <script>
-        let allBooks = [];
-
-        // Cargar libros desde la API pública al iniciar
-        async function loadCatalog() {
-            try {
-                const response = await fetch('/catalogo');
-                allBooks = await response.json();
-                renderBooks(allBooks);
-            } catch (error) {
-                console.error('Error cargando el catálogo:', error);
-                document.getElementById('books-grid').innerHTML = 
-                    `<p class="col-span-full text-center text-red-500 py-10">Error al obtener el catálogo de la base de datos.</p>`;
-            }
-        }
-
-        // Renderizar tarjetas de libros
-        function renderBooks(books) {
-            const grid = document.getElementById('books-grid');
-            if (books.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center text-gray-500 py-10">No se encontraron libros disponibles.</p>`;
-                return;
-            }
-
-            grid.innerHTML = books.map(book => {
-                const isAvailable = book.copies > 0;
-                return `
-                    <div class="bg-white rounded-xl shadow-md overflow-hidden flex flex-col justify-between border border-gray-100 hover:shadow-lg transition">
-                        <div class="p-5">
-                            <span class="inline-block px-2.5 py-0.5 rounded-full text-xs font-semibold ${isAvailable ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'} mb-3">
-                                ${isAvailable ? `Disponibles: ${book.copies}` : 'Agotado'}
-                            </span>
-                            <h3 class="font-bold text-lg text-gray-900 leading-snug mb-1">${escapeHtml(book.title)}</h3>
-                            <p class="text-sm text-gray-600 mb-3">por ${escapeHtml(book.author)}</p>
-                        </div>
-                        <div class="px-5 py-3 bg-gray-50 border-t border-gray-100 flex justify-between items-center text-xs text-gray-500">
-                            <span>ISBN: ${escapeHtml(book.isbn)}</span>
-                            <span class="font-medium text-indigo-600">ID: #${book.id}</span>
-                        </div>
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Correo electrónico</label>
+                        <input type="email" class="form-control" id="email" name="email" autocomplete="email" required>
                     </div>
-                `;
-            }).join('');
-        }
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña</label>
+                        <input type="password" class="form-control" id="password" name="password" autocomplete="current-password" required>
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                        <label class="form-check-label" for="remember_me">Recordarme durante 30 días</label>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Iniciar sesión</button>
+                </form>
 
-        // Filtrado en vivo por título, autor o ISBN
-        function filterBooks() {
-            const query = document.getElementById('search-input').value.toLowerCase();
-            const filtered = allBooks.filter(b => 
-                b.title.toLowerCase().includes(query) ||
-                b.author.toLowerCase().includes(query) ||
-                b.isbn.toLowerCase().includes(query)
-            );
-            renderBooks(filtered);
-        }
-
-        function escapeHtml(text) {
-            return String(text).replace(/[&<>"']/g, function(m) {
-                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
-            });
-        }
-
-        document.addEventListener('DOMContentLoaded', loadCatalog);
-    </script>
+                <p class="text-center mt-3 mb-0">
+                    ¿Primera vez? <a href="{{ url_for('main.register') }}">Crear cuenta</a>
+                </p>
+                <p class="text-center mt-2 mb-0">
+                    <a href="{{ url_for('main.catalog_page') }}">Consultar catálogo público</a>
+                </p>
+            </div>
+        </section>
+    </main>
 </body>
 </html>
